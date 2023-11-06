@@ -80,13 +80,14 @@ sub PrintHelpAndExit {
     print "        If omitted a random seed will be used.\n";
     print "\n";
     print "-r<rand>, --random=<rand>:\n";
-    print "        <rand> is a real between 0.0 and 1.0 to determine how much life cells\n";
+    print "        <rand> is a float between 0.0 and 1.0 to determine how much life cells\n";
     print "        per dead cells a random seed shoud generate.\n";
     print "        The default is -r0.25 and means one in four cells will be life.\n";
     print "\n";
-    print "-b<birth>, --birth=<birth>, -s<survive>, --survive=<survive>:\n";
-    print "        <birth> and <survive> are strings of digits 0-8\n";
-    print "        containing birth and survive conditions.\n";
+    print "-[b|B]<birth>, --birth=<birth>, -[s|S]<survive>, --survive=<survive>:\n";
+    print "        <birth> and <survive> are strings of digits 0-8 containing\n";
+    print "        birth and survive conditions.\n";
+    print "        You may join both with or without /, e.g. -S123B456 or -b123/s456.\n";
     print "        If omitted Conway's Life rules are used (-b3 -s23).\n";
     print "\n";
     print "-t<trace>, --trace=<trace>:\n";
@@ -99,13 +100,13 @@ sub PrintHelpAndExit {
     print "Example 1: perl GoL.pl\n";
     print "Uses a random seed and Conway's Life rules.\n";
     print "\n";
-    print "Example 2: perl GoL.pl -fgol_file.txt -b36 -s23\n";
+    print "Example 2: perl GoL.pl -fgol_file.txt -b36s23\n";
     print "Uses gol_file.txt to read the starting seed and HighLife rules.\n";
     print "\n";
-    print "Example 3: perl GoL.pl -b45678 -s2345 -u1.0\n";
-    print "Uses a random seed and Walled Cities rules.\n";
+    print "Example 3: perl GoL.pl -B45678/S2345 -u1.0\n";
+    print "Uses a random seed and Walled Cities rules, update screen every second.\n";
     print "\n";
-    print "Example 4: perl GoL.pl -b345 -s4567 -t.\n";
+    print "Example 4: perl GoL.pl -b345s4567 -t.\n";
     print "Uses a random seed, Assimilation rules and . to trace once life cells.\n";
     print "\n";
     print "Example 5: perl GoL.pl -b0123478 -s01234678 -r0.75\n";
@@ -154,15 +155,22 @@ sub InitScreenRandom {
 
 
 sub InitBirthSurvive {
-    my $refVar = shift @_;
-    my $val    = shift @_;
+    my $par    = shift @_;
 
-    if ($val !~ m/^\b[0-8]{1,9}\b/) {
-        print   "birth and/or survive not valid!\n";
-        &PrintHelpAndExit;
+    foreach my $bs ("b","s") {
+        my $val = $par;
+
+        if ($val =~ m/$bs\d+/) {
+            $val =~ s/.*$bs(\d+).*/$1/;
+            if ($val !~ m/^[0-8]{1,9}$/) {
+                print   "birth and/or survive not valid!\n";
+                &PrintHelpAndExit;
+            }
+            if ($bs eq "b") { $birth   = $val; }
+            if ($bs eq "s") { $survive = $val; }
+        }
     }
 
-    $$refVar = $val;
 }
 
 
@@ -184,14 +192,9 @@ sub ProcessArgs {
             $randLifeRatio = $arg;
         }
 
-        if (($arg =~ m/^-b/) or ($arg =~ m/^--birth=/)) {
-            $arg =~ s/^(-b|--birth=)//;
-            &InitBirthSurvive ( \$birth , $arg );
-        }
-
-        if (($arg =~ m/^-s/) or ($arg =~ m/^--survive=/)) {
-            $arg =~ s/^(-s|--survive=)//;
-            &InitBirthSurvive ( \$survive , $arg );
+        if (($arg =~ m/^-(b|s)/i) or ($arg =~ m/^--(birth|survive)=/)) {
+            $arg =~ s/(irth|urvive)=?//g;
+            &InitBirthSurvive ( lc $arg );
         }
 
         if (($arg =~ m/^-t/) or ($arg =~ m/^--trace=/)) {
