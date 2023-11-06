@@ -12,8 +12,6 @@ my($termCharWidthX, $termCharHeightY, $wpixels, $hpixels) = GetTerminalSize();
 ### SETTINGS ###
 my $debug = 0;
 
-my $waitTime = 0.1;
-
 # default Convay's Life
 my $birth   = 3;  #   birth on neighbor count <content>
 my $survive = 23; # survive on neighbor count <content>
@@ -26,6 +24,7 @@ my $trace_dead = " ";
 
 ### VARIABLES ###
 my $randLifeRatio = 0.25;
+my $updateTime = 0.1;
 
 my $maxX;
 my $maxY;
@@ -93,13 +92,17 @@ sub PrintHelpAndExit {
     print "-t<trace>, --trace=<trace>:\n";
     print "        <trace> is one char to trace dead cells that were once life.\n";
     print "\n";
+    print "-u<time>, --updatetime=<time>:\n";
+    print "        <time> is a float in seconds how fast the screen should update.\n";
+    print "        Default update time is 0.1 seconds.\n";
+    print "\n";
     print "Example 1: perl GoL.pl\n";
-    print "Uses a random seed and Conway's Life rules (-b3 -s23).\n";
+    print "Uses a random seed and Conway's Life rules.\n";
     print "\n";
     print "Example 2: perl GoL.pl -fgol_file.txt -b36 -s23\n";
     print "Uses gol_file.txt to read the starting seed and HighLife rules.\n";
     print "\n";
-    print "Example 3: perl GoL.pl -b45678 -s2345\n";
+    print "Example 3: perl GoL.pl -b45678 -s2345 -u1.0\n";
     print "Uses a random seed and Walled Cities rules.\n";
     print "\n";
     print "Example 4: perl GoL.pl -b345 -s4567 -t.\n";
@@ -195,6 +198,11 @@ sub ProcessArgs {
             $arg =~ s/^(-t|--trace=)//;
             $trace_dead = $arg;
         }
+
+        if (($arg =~ m/^-u/) or ($arg =~ m/^--updatetime=/)) {
+            $arg =~ s/^(-u|--updatetime=)//;
+            $updateTime = $arg;
+        }
     }
     if (not defined $screen[0]) {
         &InitScreenRandom;
@@ -242,7 +250,7 @@ sub CalcNewScreenFromScreen {
 
 sub UpdateScreen {
     print "\n";
-    select undef, undef, undef, $waitTime;
+    select undef, undef, undef, $updateTime;
 }
 
 
