@@ -67,7 +67,7 @@ sub WriteFile {
 
 sub PrintHelpAndExit {
     print "\n";
-    print "Usage: perl GoL.pl [arguments]\n";
+    print "Usage: perl GoL.pl [options]\n";
     print "\n";
     print "-h, --help:\n";
     print "        Prints this help and exits.\n";
@@ -112,6 +112,7 @@ sub PrintHelpAndExit {
     print "Example 5: perl GoL.pl -b0123478 -s01234678 -r0.75\n";
     print "Uses a random seed with 3 life per 1 dead cell and Antilife rules.\n";
     print "\n";
+    print "Find more rules at https://conwaylife.com/wiki/List_of_Life-like_rules \n";
     exit 1;
 }
 
